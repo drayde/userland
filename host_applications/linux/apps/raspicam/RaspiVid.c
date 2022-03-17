@@ -1521,6 +1521,25 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
       goto error;
    }
 
+   if(state->common_settings.verbose)
+   {
+      if (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
+      {
+         fprintf(stderr, "Stereo mode: off\n")
+      }
+      else
+      {
+         bool sbs = (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_SIDE_BY_SIDE);
+         fprintf(stderr, "Stereo mode: %s\n", sbs ? "SBS" : "TB");
+         fprintf(stderr, "Decimate: %s\n", state->camera_parameters.stereo_mode.decimate ? "yes" : "no");
+         fprintf(stderr, "Swap: %s\n", state->camera_parameters.stereo_mode.swap_eyes ? "yes" : "no");
+      }
+      if (state->camera_parameters.force_stereo)
+      {
+         fprintf(stderr, "Force stereo: ON\n")
+      }      
+   }
+
    status = raspicamcontrol_set_stereo_mode(camera->output[0], &state->camera_parameters.stereo_mode);
    status += raspicamcontrol_set_stereo_mode(camera->output[1], &state->camera_parameters.stereo_mode);
    status += raspicamcontrol_set_stereo_mode(camera->output[2], &state->camera_parameters.stereo_mode);
