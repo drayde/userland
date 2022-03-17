@@ -1525,7 +1525,7 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
    {
       if (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
       {
-         fprintf(stderr, "Stereo mode: off\n")
+         fprintf(stderr, "Stereo mode: off\n");
       }
       else
       {
@@ -1536,7 +1536,7 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
       }
       if (state->camera_parameters.force_stereo)
       {
-         fprintf(stderr, "Force stereo: ON\n")
+         fprintf(stderr, "Force stereo: ON\n");
       }      
    }
 
