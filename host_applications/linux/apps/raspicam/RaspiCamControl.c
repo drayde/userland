@@ -181,7 +181,8 @@ enum
    CommandAnalogGain,
    CommandDigitalGain,
    CommandSettings,
-   CommandFocusWindow
+   CommandFocusWindow,
+   CommandForceStereoPreview
 };
 
 static COMMAND_LIST  cmdline_commands[] =
@@ -216,6 +217,7 @@ static COMMAND_LIST  cmdline_commands[] =
    {CommandDigitalGain, "-digitalgain", "dg", "Set the digital gain (floating point)", 1},
    {CommandSettings,    "-settings",   "set","Retrieve camera settings and write to stdout", 0},
    {CommandFocusWindow, "-focus",      "fw","Draw a window with the focus FoM value on the image.", 0},
+   {CommandForceStereoPreview, "-forcestereo", "fs","Use I420 mode to enable preview of both cameras in stereo mode", 0}
 };
 
 static int cmdline_commands_size = sizeof(cmdline_commands) / sizeof(cmdline_commands[0]);
@@ -853,6 +855,13 @@ int raspicamcontrol_parse_cmdline(RASPICAM_CAMERA_PARAMETERS *params, const char
    case CommandFocusWindow:
    {
       params->focus_window = 1;
+      used = 1;
+      break;
+   }
+
+   case CommandForceStereoPreview:
+   {
+      params->force_stereo = 1;
       used = 1;
       break;
    }

@@ -1596,7 +1596,7 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
 
    format = preview_port->format;
 
-   format->encoding = MMAL_ENCODING_OPAQUE;
+   format->encoding = state->camera_parameters.force_stereo ? MMAL_ENCODING_I420 : MMAL_ENCODING_OPAQUE;
    format->encoding_variant = MMAL_ENCODING_I420;
 
    if(state->camera_parameters.shutter_speed > 6000000)
@@ -1625,7 +1625,7 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
       }
    }
 
-   format->encoding = MMAL_ENCODING_OPAQUE;
+   format->encoding = state->camera_parameters.force_stereo ? MMAL_ENCODING_I420 : MMAL_ENCODING_OPAQUE;
    format->es->video.width = VCOS_ALIGN_UP(state->common_settings.width, 32);
    format->es->video.height = VCOS_ALIGN_UP(state->common_settings.height, 16);
    format->es->video.crop.x = 0;

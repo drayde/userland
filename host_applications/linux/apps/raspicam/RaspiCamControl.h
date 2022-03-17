@@ -168,6 +168,7 @@ typedef struct raspicam_camera_parameters_s
    unsigned int annotate_x;
    unsigned int annotate_y;
    int focus_window;
+   int force_stereo; // 0 or 1, 0 is default
 
    MMAL_PARAMETER_STEREOSCOPIC_MODE_T stereo_mode;
    float analog_gain;         // Analog gain
