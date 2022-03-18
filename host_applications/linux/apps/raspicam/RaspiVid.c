@@ -1207,6 +1207,13 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
       fprintf(stderr, "Camera component done\n");
 
    return status;
+
+error:
+
+   if (camera)
+      mmal_component_destroy(camera);
+
+   return status;
 }
 
 /**
@@ -1225,31 +1232,6 @@ static void destroy_camera_component(RASPIVID_STATE *state)
 }
 
 
-/**
- * Pause for specified time, but return early if detect an abort request
- *
- * @param state Pointer to state control struct
- * @param pause Time in ms to pause
- * @param callback Struct contain an abort flag tested for early termination
- *
- */
-static int pause_and_test_abort(RASPIVID_STATE *state, int pause)
-{
-   int wait;
-
-   if (!pause)
-      return 0;
-
-   // Going to check every ABORT_INTERVAL milliseconds
-   for (wait = 0; wait < pause; wait+= ABORT_INTERVAL)
-   {
-      vcos_sleep(ABORT_INTERVAL);
-      if (state->callback_data.abort)
-         return 1;
-   }
-
-   return 0;
-}
 
 
 /**
