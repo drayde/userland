@@ -489,7 +489,7 @@ static void dump_status(RASPIVID_STATE *state)
                {
                   int width = param.cameras[camera_num].max_width;
                   int height = param.cameras[camera_num].max_height;
-                  fprintf(stderr, "Cam #%d: %d x %d, %s", camera_num, width, height, param.cameras[camera_num].camera_name);
+                  fprintf(stderr, "Cam #%d: %d x %d, %s\n", camera_num, width, height, param.cameras[camera_num].camera_name);
                }
             }
             else
@@ -507,7 +507,15 @@ static void dump_status(RASPIVID_STATE *state)
          vcos_log_error("Failed to create camera_info component");
       }
    }
-   
+   if (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
+   {
+      fprintf(stderr, "\nUsing camera %d \nsensor mode %d\n\n", state->cameraNum, state->sensor_mode);
+   }
+   else
+   {
+      fprintf(stderr, "\nUsing stereo mode \nsensor mode %d\n\n", state->sensor_mode);
+   }
+
 
 
 
