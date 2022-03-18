@@ -1308,7 +1308,7 @@ int main(int argc, const char **argv)
    // Disable USR1 for the moment - may be reenabled if go in to signal capture mode
    signal(SIGUSR1, SIG_IGN);
 
-   set_app_name(argv[0]);
+   set_app_name("raspivid3D");
 
    // Do we have any parameters
    if (argc == 1)
