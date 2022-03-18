@@ -507,13 +507,13 @@ static void dump_status(RASPIVID_STATE *state)
          vcos_log_error("Failed to create camera_info component");
       }
    }
-   if (state.camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
+   if (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
    {
-      fprintf(stderr, "\nUsing camera %d \nsensor mode %d\n\n", state.cameraNum, state.sensor_mode);
+      fprintf(stderr, "\nUsing camera %d \nsensor mode %d\n\n", state->cameraNum, state->sensor_mode);
    }
    else
    {
-      fprintf(stderr, "\nUsing stereo mode \nsensor mode %d\n\n", state.sensor_mode);
+      fprintf(stderr, "\nUsing stereo mode \nsensor mode %d\n\n", state->sensor_mode);
    }
 
 
@@ -1400,7 +1400,7 @@ int main(int argc, const char **argv)
          vcos_log_error("%s: Failed to connect camera to preview", __func__);
       }
 
-error:
+//error:
 
       mmal_status_to_int(status);
 
