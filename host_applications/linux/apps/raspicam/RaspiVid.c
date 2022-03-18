@@ -509,11 +509,11 @@ static void dump_status(RASPIVID_STATE *state)
    }
    if (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
    {
-      fprintf(stderr, "\nUsing camera %d \nsensor mode %d\n\n", state->cameraNum, state->sensor_mode);
+      fprintf(stderr, "\nUsing camera %d \nsensor mode %d\n\n", state->common_settings.cameraNum, state->common_settings.sensor_mode);
    }
    else
    {
-      fprintf(stderr, "\nUsing stereo mode \nsensor mode %d\n\n", state->sensor_mode);
+      fprintf(stderr, "\nUsing stereo mode \nsensor mode %d\n\n", state->common_settings.sensor_mode);
    }
 
 
