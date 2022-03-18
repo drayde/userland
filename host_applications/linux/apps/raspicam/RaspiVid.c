@@ -489,7 +489,7 @@ static void dump_status(RASPIVID_STATE *state)
                {
                   int width = param.cameras[camera_num].max_width;
                   int height = param.cameras[camera_num].max_height;
-                  fprintf(stderr, "Cam #%d: %d x %d, %s", camera_num, width, height, param.cameras[camera_num].camera_name)
+                  fprintf(stderr, "Cam #%d: %d x %d, %s", camera_num, width, height, param.cameras[camera_num].camera_name);
                }
             }
             else
