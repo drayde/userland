@@ -536,9 +536,6 @@ static void dump_status(RASPIVID_STATE *state)
    }
    fprintf(stderr, "\nInitial state '%s'\n", raspicli_unmap_xref(state->bCapturing, initial_map, initial_map_size));
    fprintf(stderr, "\n\n");
-
-   raspipreview_dump_parameters(&state->preview_parameters);
-   raspicamcontrol_dump_parameters(&state->camera_parameters);
 }
 
 /**
@@ -1024,25 +1021,6 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
       goto error;
    }
 
-   if(state->common_settings.verbose)
-   {
-      if (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
-      {
-         fprintf(stderr, "Stereo mode: off\n");
-      }
-      else
-      {
-         bool sbs = (state->camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_SIDE_BY_SIDE);
-         fprintf(stderr, "Stereo mode: %s\n", sbs ? "SBS" : "TB");
-         fprintf(stderr, "Decimate: %s\n", state->camera_parameters.stereo_mode.decimate ? "yes" : "no");
-         fprintf(stderr, "Swap: %s\n", state->camera_parameters.stereo_mode.swap_eyes ? "yes" : "no");
-      }
-      if (state->camera_parameters.force_stereo)
-      {
-         fprintf(stderr, "Force stereo: ON\n");
-      }      
-   }
-
    status = raspicamcontrol_set_stereo_mode(camera->output[MMAL_CAMERA_PREVIEW_PORT], &state->camera_parameters.stereo_mode);
    status += raspicamcontrol_set_stereo_mode(camera->output[MMAL_CAMERA_VIDEO_PORT], &state->camera_parameters.stereo_mode);
    status += raspicamcontrol_set_stereo_mode(camera->output[MMAL_CAMERA_CAPTURE_PORT], &state->camera_parameters.stereo_mode);
@@ -1337,6 +1315,28 @@ int main(int argc, const char **argv)
    {
       print_app_details(stderr);
       dump_status(&state);
+
+ 
+      if (state.camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_NONE)
+      {
+         fprintf(stderr, "Stereo mode: off\n");
+      }
+      else
+      {
+         bool sbs = (state.camera_parameters.stereo_mode.mode == MMAL_STEREOSCOPIC_MODE_SIDE_BY_SIDE);
+         fprintf(stderr, "Stereo mode: %s\n", sbs ? "SBS" : "TB");
+         fprintf(stderr, "Decimate: %s\n", state.camera_parameters.stereo_mode.decimate ? "yes" : "no");
+         fprintf(stderr, "Swap: %s\n", state.camera_parameters.stereo_mode.swap_eyes ? "yes" : "no");
+      }
+      if (state.camera_parameters.force_stereo)
+      {
+         fprintf(stderr, "Force stereo: ON\n");
+      }          
+
+      raspipreview_dump_parameters(&state->preview_parameters);
+      raspicamcontrol_dump_parameters(&state->camera_parameters);
+
+      fprintf(stderr, "\n");
    }
 
    if (state.camera_parameters.stereo_mode.mode != MMAL_STEREOSCOPIC_MODE_NONE)
@@ -1349,9 +1349,6 @@ int main(int argc, const char **argv)
       check_camera_model(state.common_settings.cameraNum);
    }
 
-   if (state.common_settings.gps)
-      if (raspi_gps_setup(state.common_settings.verbose))
-         state.common_settings.gps = 0;
 
    // OK, we have a nice set of parameters. Now set up our components
    // We have three components. Camera, Preview and encoder.
@@ -1394,6 +1391,7 @@ int main(int argc, const char **argv)
             state.preview_connection = NULL;
       }
 
+      // main loop
       if (state.timeout)
          vcos_sleep(state.timeout);
       else
