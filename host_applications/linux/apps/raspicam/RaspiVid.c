@@ -1203,8 +1203,6 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
 
    state->camera_component = camera;
 
-   update_annotation_data(state);
-
    if (state->common_settings.verbose)
       fprintf(stderr, "Camera component done\n");
 
