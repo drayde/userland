@@ -1394,6 +1394,15 @@ int main(int argc, const char **argv)
             state.preview_connection = NULL;
       }
 
+      if (state.timeout)
+         vcos_sleep(state.timeout);
+      else
+      {
+         // timeout = 0 so run forever
+         while(1)
+            vcos_sleep(ABORT_INTERVAL);
+      }
+
       if (status != MMAL_SUCCESS)
       {
          mmal_status_to_int(status);
