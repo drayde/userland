@@ -1449,7 +1449,7 @@ int main(int argc, const char **argv)
       dump_status(&state);
    }
 
-   if (state.camera_parameters.stereo_mode)
+   if (state->camera_parameters.stereo_mode.mode != MMAL_STEREOSCOPIC_MODE_NONE)
    {
       check_camera_model(0);
       check_camera_model(1);
