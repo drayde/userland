@@ -1333,8 +1333,8 @@ int main(int argc, const char **argv)
          fprintf(stderr, "Force stereo: ON\n");
       }          
 
-      raspipreview_dump_parameters(&state->preview_parameters);
-      raspicamcontrol_dump_parameters(&state->camera_parameters);
+      raspipreview_dump_parameters(&state.preview_parameters);
+      raspicamcontrol_dump_parameters(&state.camera_parameters);
 
       fprintf(stderr, "\n");
    }
