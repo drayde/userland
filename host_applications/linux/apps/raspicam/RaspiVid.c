@@ -464,15 +464,54 @@ static void dump_status(RASPIVID_STATE *state)
       return;
    }
 
-   raspicommonsettings_dump_parameters(&state->common_settings);
+   // dump camera info
+   {
+      MMAL_COMPONENT_T *camera_info;
+      MMAL_STATUS_T status;
 
-   fprintf(stderr, "bitrate %d, framerate %d, time delay %d\n", state->bitrate, state->framerate, state->timeout);
-   fprintf(stderr, "H264 Profile %s\n", raspicli_unmap_xref(state->profile, profile_map, profile_map_size));
-   fprintf(stderr, "H264 Level %s\n", raspicli_unmap_xref(state->level, level_map, level_map_size));
-   fprintf(stderr, "H264 Quantisation level %d, Inline headers %s\n", state->quantisationParameter, state->bInlineHeaders ? "Yes" : "No");
-   fprintf(stderr, "H264 Fill SPS Timings %s\n", state->addSPSTiming ? "Yes" : "No");
-   fprintf(stderr, "H264 Intra refresh type %s, period %d\n", raspicli_unmap_xref(state->intra_refresh_type, intra_refresh_map, intra_refresh_map_size), state->intraperiod);
-   fprintf(stderr, "H264 Slices %d\n", state->slices);
+      // Try to get the camera name and maximum supported resolution
+      status = mmal_component_create(MMAL_COMPONENT_DEFAULT_CAMERA_INFO, &camera_info);
+      if (status == MMAL_SUCCESS)
+      {
+         MMAL_PARAMETER_CAMERA_INFO_T param;
+         param.hdr.id = MMAL_PARAMETER_CAMERA_INFO;
+         param.hdr.size = sizeof(param)-4;  // Deliberately undersize to check firmware version
+         status = mmal_port_parameter_get(camera_info->control, &param.hdr);
+
+         if (status != MMAL_SUCCESS)
+         {
+            // Running on newer firmware
+            param.hdr.size = sizeof(param);
+            status = mmal_port_parameter_get(camera_info->control, &param.hdr);
+            if (status == MMAL_SUCCESS) 
+            {
+               for (int camera_num=0; camera_num < param.num_cameras; camera_num++)
+               {
+                  int width = param.cameras[camera_num].max_width;
+                  int height = param.cameras[camera_num].max_height;
+                  fprintf(stderr, "Cam #%d: %d x %d, %s", camera_num, width, height, param.cameras[camera_num].camera_name)
+               }
+            }
+            else
+               vcos_log_error("Cannot read camera info, keeping the defaults for OV5647");
+         }
+         else
+         {
+            vcos_log_error("Cannot read camera info, old firmware");
+         }
+
+         mmal_component_destroy(camera_info);
+      }
+      else
+      {
+         vcos_log_error("Failed to create camera_info component");
+      }
+   }
+   
+
+
+
+   fprintf(stderr, "framerate %d\n", state->framerate);
 
    // Not going to display segment data unless asked for it.
    if (state->segmentSize)
