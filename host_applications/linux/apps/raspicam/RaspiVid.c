@@ -1207,13 +1207,6 @@ static MMAL_STATUS_T create_camera_component(RASPIVID_STATE *state)
       fprintf(stderr, "Camera component done\n");
 
    return status;
-
-error:
-
-   if (camera)
-      mmal_component_destroy(camera);
-
-   return status;
 }
 
 /**
@@ -1258,136 +1251,6 @@ static int pause_and_test_abort(RASPIVID_STATE *state, int pause)
    return 0;
 }
 
-
-/**
- * Function to wait in various ways (depending on settings)
- *
- * @param state Pointer to the state data
- *
- * @return !0 if to continue, 0 if reached end of run
- */
-static int wait_for_next_change(RASPIVID_STATE *state)
-{
-   int keep_running = 1;
-   static int64_t complete_time = -1;
-
-   // Have we actually exceeded our timeout?
-   int64_t current_time =  get_microseconds64()/1000;
-
-   if (complete_time == -1)
-      complete_time =  current_time + state->timeout;
-
-   // if we have run out of time, flag we need to exit
-   if (current_time >= complete_time && state->timeout != 0)
-      keep_running = 0;
-
-   switch (state->waitMethod)
-   {
-   case WAIT_METHOD_NONE:
-      (void)pause_and_test_abort(state, state->timeout);
-      return 0;
-
-   case WAIT_METHOD_FOREVER:
-   {
-      // We never return from this. Expect a ctrl-c to exit or abort.
-      while (!state->callback_data.abort)
-         // Have a sleep so we don't hog the CPU.
-         vcos_sleep(ABORT_INTERVAL);
-
-      return 0;
-   }
-
-   case WAIT_METHOD_TIMED:
-   {
-      int abort;
-
-      if (state->bCapturing)
-         abort = pause_and_test_abort(state, state->onTime);
-      else
-         abort = pause_and_test_abort(state, state->offTime);
-
-      if (abort)
-         return 0;
-      else
-         return keep_running;
-   }
-
-   case WAIT_METHOD_KEYPRESS:
-   {
-      char ch;
-
-      if (state->common_settings.verbose)
-         fprintf(stderr, "Press Enter to %s, X then ENTER to exit, [i,o,r] then ENTER to change zoom\n", state->bCapturing ? "pause" : "capture");
-
-      ch = getchar();
-      if (ch == 'x' || ch == 'X')
-         return 0;
-      else if (ch == 'i' || ch == 'I')
-      {
-         if (state->common_settings.verbose)
-            fprintf(stderr, "Starting zoom in\n");
-
-         raspicamcontrol_zoom_in_zoom_out(state->camera_component, ZOOM_IN, &(state->camera_parameters).roi);
-
-         if (state->common_settings.verbose)
-            dump_status(state);
-      }
-      else if (ch == 'o' || ch == 'O')
-      {
-         if (state->common_settings.verbose)
-            fprintf(stderr, "Starting zoom out\n");
-
-         raspicamcontrol_zoom_in_zoom_out(state->camera_component, ZOOM_OUT, &(state->camera_parameters).roi);
-
-         if (state->common_settings.verbose)
-            dump_status(state);
-      }
-      else if (ch == 'r' || ch == 'R')
-      {
-         if (state->common_settings.verbose)
-            fprintf(stderr, "starting reset zoom\n");
-
-         raspicamcontrol_zoom_in_zoom_out(state->camera_component, ZOOM_RESET, &(state->camera_parameters).roi);
-
-         if (state->common_settings.verbose)
-            dump_status(state);
-      }
-
-      return keep_running;
-   }
-
-
-   case WAIT_METHOD_SIGNAL:
-   {
-      // Need to wait for a SIGUSR1 signal
-      sigset_t waitset;
-      int sig;
-      int result = 0;
-
-      sigemptyset( &waitset );
-      sigaddset( &waitset, SIGUSR1 );
-
-      // We are multi threaded because we use mmal, so need to use the pthread
-      // variant of procmask to block SIGUSR1 so we can wait on it.
-      pthread_sigmask( SIG_BLOCK, &waitset, NULL );
-
-      if (state->common_settings.verbose)
-      {
-         fprintf(stderr, "Waiting for SIGUSR1 to %s\n", state->bCapturing ? "pause" : "capture");
-      }
-
-      result = sigwait( &waitset, &sig );
-
-      if (state->common_settings.verbose && result != 0)
-         fprintf(stderr, "Bad signal received - error %d\n", errno);
-
-      return keep_running;
-   }
-
-   } // switch
-
-   return keep_running;
-}
 
 /**
  * main
@@ -1447,7 +1310,7 @@ int main(int argc, const char **argv)
       dump_status(&state);
    }
 
-   if (state->camera_parameters.stereo_mode.mode != MMAL_STEREOSCOPIC_MODE_NONE)
+   if (state.camera_parameters.stereo_mode.mode != MMAL_STEREOSCOPIC_MODE_NONE)
    {
       check_camera_model(0);
       check_camera_model(1);
